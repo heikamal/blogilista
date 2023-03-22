@@ -46,9 +46,10 @@ const nonExistingId = async () => {
     likes: 1 })
 
   await blog.save()
-  await blog.remove()
+  const id = blog._id.toString()
+  await Blog.findByIdAndDelete(id)
 
-  return blog._id.toString()
+  return id
 }
 
 const blogsInDb = async () => {

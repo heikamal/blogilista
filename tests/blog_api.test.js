@@ -211,43 +211,52 @@ describe('when there is initially one user at db', () => {
             expect(usernames).toContain(newUser.username)
         })
       
-        est('creation fails with an existing username and returns 400', async () => {
+        test('creation fails with an existing username with proper status and error', async () => {
             const newUser = {
                 name: 'admin',
                 username: 'root',
                 password: 'sekret',
             }
       
-            await api
+            const result = await api
             .post('/api/users')
             .send(newUser)
             .expect(400)
+            .expect('Content-Type', /application\/json/)
+
+            expect(result.body.error).toContain('expected `username` to be unique')
         })
     
-        test('creation fails when username is less than 3 characters and returns 400', async () => {
+        test('creation fails when username is less than 3 characters with proper status and error', async () => {
             const newUser = {
                 name: 'Heikki Malkavaara',
                 username: 'hm',
                 password: 'salasana123',
             }
     
-            await api
+            const result = await api
             .post('/api/users')
             .send(newUser)
             .expect(400)
+            .expect('Content-Type', /application\/json/)
+
+            expect(result.body.error).toContain('shorter than the minimum allowed length (3)')
         })
     
-        test('creation fails when password is less than 3 characters and returns 400', async () => {
+        test('creation fails when password is less than 3 characters with proper status and error', async () => {
             const newUser = {
                 name: 'Heikki Malkavaara',
                 username: 'heimal',
                 password: 's',
             }
     
-            await api
+            const result = await api
             .post('/api/users')
             .send(newUser)
             .expect(400)
+            .expect('Content-Type', /application\/json/)
+
+            expect(result.body.error).toContain('password missing or too short')
         })
     })
 })

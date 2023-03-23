@@ -3,14 +3,6 @@ const Blog = require('../models/blog')
 const User = require('../models/user')
 const jwt = require('jsonwebtoken')
 
-const getTokenFrom = request => {  
-    const authorization = request.get('authorization')  
-    if (authorization && authorization.startsWith('Bearer ')) {    
-        return authorization.replace('Bearer ', '')  
-    }  
-    return null
-}
-
 blogsRouter.get('/', async (request, response) => {
     const blogs = await Blog.find({}).populate('user', { username: 1, name: 1, id: 1 })
     response.json(blogs)
@@ -18,7 +10,6 @@ blogsRouter.get('/', async (request, response) => {
   
 blogsRouter.post('/', async (request, response, next) => {
     const body = request.body
-    console.log('token got:', request.token)
 
     const decodedToken = jwt.verify(request.token, process.env.SECRET)
     if (!decodedToken.id) {    
@@ -43,7 +34,18 @@ blogsRouter.post('/', async (request, response, next) => {
 })
 
 blogsRouter.delete('/:id', async (request, response) => {
-    await Blog.findByIdAndRemove(request.params.id)
+    const decodedToken = jwt.verify(request.token, process.env.SECRET)
+    if (!decodedToken.id) {    
+        return response.status(401).json({ error: 'token invalid' })  
+    }
+    const user = await User.findById(decodedToken.id)
+    const blog = await Blog.findById(request.params.id)
+
+    if (blog.user._id.toString() !== user._id.toString()) {
+        return response.status(401).json({ error: 'user invalid' })
+    }
+
+    await Blog.findByIdAndRemove(blog.id)
     response.status(204).end()
 })
 

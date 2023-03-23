@@ -3,6 +3,8 @@ const supertest = require('supertest')
 const helper = require('./test_helper')
 const app = require('../app')
 const Blog = require('../models/blog')
+const bcrypt = require('bcrypt')
+const User = require('../models/user')
 
 const api = supertest(app)
 
@@ -158,6 +160,94 @@ describe('when there is initially some notes saved', () => {
             .send(updatedBlog)
             
             expect(response.body).toBe(null)
+        })
+    })
+})
+
+describe('when there is initially one user at db', () => {
+    beforeEach(async () => {
+      await User.deleteMany({})
+  
+      const passwordHash = await bcrypt.hash('sekret', 10)
+      const user = new User({ name: 'admin' ,username: 'root', passwordHash })
+  
+      await user.save()
+    })
+
+    test('get to /api/users/ should return all the users in db', async () => {
+        const response = await api
+        .get('/api/users/')
+        .expect(200)
+        .expect('Content-Type', /application\/json/)
+
+        const userList = response.body
+
+        const userListDb = await helper.usersInDb()
+
+        expect(userList).toEqual(userListDb)
+    
+    })
+
+    describe('creating a new user', () => {
+        test('creation succeeds with a unique username', async () => {
+            const usersAtStart = await helper.usersInDb()
+        
+            const newUser = {
+              name: 'Heikki Malkavaara',
+              username: 'heimal',
+              password: 'salasana123',
+            }
+        
+            await api
+              .post('/api/users')
+              .send(newUser)
+              .expect(201)
+              .expect('Content-Type', /application\/json/)
+        
+            const usersAtEnd = await helper.usersInDb()
+            expect(usersAtEnd).toHaveLength(usersAtStart.length + 1)
+        
+            const usernames = usersAtEnd.map(u => u.username)
+            expect(usernames).toContain(newUser.username)
+        })
+      
+        est('creation fails with an existing username and returns 400', async () => {
+            const newUser = {
+                name: 'admin',
+                username: 'root',
+                password: 'sekret',
+            }
+      
+            await api
+            .post('/api/users')
+            .send(newUser)
+            .expect(400)
+        })
+    
+        test('creation fails when username is less than 3 characters and returns 400', async () => {
+            const newUser = {
+                name: 'Heikki Malkavaara',
+                username: 'hm',
+                password: 'salasana123',
+            }
+    
+            await api
+            .post('/api/users')
+            .send(newUser)
+            .expect(400)
+        })
+    
+        test('creation fails when password is less than 3 characters and returns 400', async () => {
+            const newUser = {
+                name: 'Heikki Malkavaara',
+                username: 'heimal',
+                password: 's',
+            }
+    
+            await api
+            .post('/api/users')
+            .send(newUser)
+            .expect(400)
         })
     })
 })

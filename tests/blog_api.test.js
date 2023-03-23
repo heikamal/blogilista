@@ -211,7 +211,7 @@ describe('when there is initially one user at db', () => {
             expect(usernames).toContain(newUser.username)
         })
       
-        test('creation fails with an existing username with proper status and error', async () => {
+        test('creation fails with an existing username', async () => {
             const newUser = {
                 name: 'admin',
                 username: 'root',
@@ -227,7 +227,7 @@ describe('when there is initially one user at db', () => {
             expect(result.body.error).toContain('expected `username` to be unique')
         })
     
-        test('creation fails when username is less than 3 characters with proper status and error', async () => {
+        test('creation fails when username is less than 3 characters', async () => {
             const newUser = {
                 name: 'Heikki Malkavaara',
                 username: 'hm',
@@ -243,7 +243,7 @@ describe('when there is initially one user at db', () => {
             expect(result.body.error).toContain('shorter than the minimum allowed length (3)')
         })
     
-        test('creation fails when password is less than 3 characters with proper status and error', async () => {
+        test('creation fails when password is less than 3 characters', async () => {
             const newUser = {
                 name: 'Heikki Malkavaara',
                 username: 'heimal',

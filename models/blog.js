@@ -16,7 +16,12 @@ const blogSchema = mongoose.Schema({
     likes: {
         type: Number,
         required: true
+    },
+    user: {    
+        type: mongoose.Schema.Types.ObjectId,    
+        ref: 'User'  
     }
+    
 })
 
 // muutetaan palautettu _id-olio tekstijonoksi "id"-parametrin alle

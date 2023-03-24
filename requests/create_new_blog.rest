@@ -1,6 +1,5 @@
 POST http://localhost:3001/api/blogs
 Content-Type: application/json
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6ImhlaW1hbCIsImlkIjoiNjQxYzRmOWM1ZWQ3NjhhN2JkY2UzY2Q1IiwiaWF0IjoxNjc5NTgwNjAxfQ.V0mpTkb1uX-8hNbicFSQ5mwviSpW1AXEBXni0aTLCas
 
 {
     "title": "Elämäni kiven sisällä",

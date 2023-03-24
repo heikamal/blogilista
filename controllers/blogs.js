@@ -1,5 +1,6 @@
 const blogsRouter = require('express').Router()
 const Blog = require('../models/blog')
+const userExtractor = require('../utils/middleware').userExtractor
 const User = require('../models/user')
 const jwt = require('jsonwebtoken')
 
@@ -8,7 +9,7 @@ blogsRouter.get('/', async (request, response) => {
     response.json(blogs)
 })
   
-blogsRouter.post('/', async (request, response, next) => {
+blogsRouter.post('/', userExtractor, async (request, response, next) => {
     const body = request.body
     const user = request.user
     
@@ -28,13 +29,13 @@ blogsRouter.post('/', async (request, response, next) => {
     
 })
 
-blogsRouter.delete('/:id', async (request, response) => {
+blogsRouter.delete('/:id', userExtractor, async (request, response) => {
     const user = request.user
 
     const blog = await Blog.findById(request.params.id)
 
     if (blog.user._id.toString() !== user._id.toString()) {
-        return response.status(401).json({ error: 'user invalid' })
+        return response.status(401).json({ error: 'not an authorized user' })
     }
 
     await Blog.findByIdAndRemove(blog.id)
